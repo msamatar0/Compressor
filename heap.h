@@ -5,6 +5,7 @@
 #include <queue>
 #include <vector>
 #include <sstream>
+using namespace std;
 
 //Vector heap
 template<class t, class comparator> class heap{
