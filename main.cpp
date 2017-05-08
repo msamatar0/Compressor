@@ -2,10 +2,11 @@
 
 string getUniqueChars(string str);
 vector<int> frequencies(string str, string chars);
+void codes(chNode *n, string s, map<char, int> &code);
 string huffman(string str);
 
 int main(){
-	cout << testStr << "Compresses to " << huffman(testStr);
+	cout << "Compressed String: " << huffman(gettysburg) << endl;
 }
 
 //Returns string containing all unique characters in given string
@@ -30,9 +31,56 @@ vector<int> frequencies(string str, string chars){
 	return freqs;
 }
 
+void codes(chNode *n, string s, map<char, int> &code){
+	int codeVal = 0;
+	stringstream ss;
+	if(n == nullptr)
+		return;
+	if(n->letter != '\0'){
+		ss << s;
+		ss >> codeVal;
+		ss.clear();
+		code.insert(pair<char, int>(n->letter, codeVal));
+		cout << n->letter << ": " << s << endl;
+	}
+	codes(n->left, s + '0', code);
+	codes(n->right, s + '1', code);
+}
+
 //Huffman compression algorithm
 string huffman(string str){
-	string bin, chars = getUniqueChars(str);
-	vector<int> freqs = frequencies(str, chars);
+	stringstream ss;
+	chNode *left, *right,
+		*root = nullptr;
+
+	string bin, uniques = getUniqueChars(str);
+	vector<int> freqs = frequencies(str, uniques);
+	
+	auto greater = [](chNode *a, chNode *b){ return a->freq > b->freq; };
+	priority_queue<chNode *, vector<chNode *>, decltype(greater)> heap(greater);
+
+	for(int i = 0; i < freqs.size(); ++i)
+		heap.push(new chNode(uniques[i], freqs[i]));
+
+	//Builds a Huffman tree from the priority queue
+	while(heap.size() > 1){
+		left = heap.top();
+		heap.pop();
+		right = heap.top();
+		heap.pop();
+		//'\0' is used to indicate that the node is internal
+		root = new chNode('\0', left->freq + right->freq);
+		root->left = left;
+		root->right = right;
+		heap.push(root);
+	}
+	map<char, int> codeMap;
+	codes(root, "", codeMap);
+	cout << endl;
+	
+	for(int i = 0; i < str.length(); ++i)
+		ss << codeMap[str[i]];
+	ss >> bin;
+	ss.clear();
 	return bin;
 }
